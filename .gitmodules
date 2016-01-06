@@ -1,3 +1,15 @@
 [submodule "catkin_ws/src/netft"]
 	path = catkin_ws/src/netft
 	url = git@github.mit.edu:mCube/netft.git
+[submodule "software/externals/lcm-pod"]
+	path = software/externals/lcm-pod
+	url = https://github.com/RobotLocomotion/lcm-pod.git
+[submodule "software/externals/libbot"]
+	path = software/externals/libbot
+	url = https://github.com/RobotLocomotion/libbot.git
+[submodule "ros_ws/abb-ros"]
+	path = ros_ws/abb-ros
+	url = git@github.mit.edu:mCube/abb-ros.git
+[submodule "catkin_ws/src/wsg32-ros-pkg"]
+	path = catkin_ws/src/wsg32-ros-pkg
+	url = git@github.mit.edu:mCube/wsg32-ros-pkg.git
