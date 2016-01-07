@@ -1,8 +1,0 @@
-build/
-lib/
-bin/
-srv_gen/
-*.py
-*.pyc
-
-

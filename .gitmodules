@@ -1,6 +1,3 @@
-[submodule "ros_ws/netft"]
-	path = ros_ws/netft
-	url = git@github.mit.edu:mCube/netft.git
 [submodule "software/externals/lcm-pod"]
 	path = software/externals/lcm-pod
 	url = https://github.com/RobotLocomotion/lcm-pod.git

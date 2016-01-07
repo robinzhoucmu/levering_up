@@ -1,4 +1,0 @@
-float64 abs_force
-float64 max_force
-float64 abs_torque
-float64 max_torque
