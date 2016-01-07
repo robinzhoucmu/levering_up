@@ -68,6 +68,9 @@ setup_prepush2()
   fi
   
   export ROSLAUNCH_SSH_UNKNOWN=1
+  
+  #set main git user
+  gituser rkolbert
 }
 
 set_ros()
@@ -78,30 +81,6 @@ set_ros()
     source /opt/ros/indigo/setup.bash
   fi
   export ROS_PACKAGE_PATH=$HOME/prepush2/ros_ws/:$ROS_PACKAGE_PATH
-}
-
-gituser()
-{
-  if [ $# -eq 0 ]; then
-    echo 'Current user is: '
-    git config user.name
-    git config user.email
-    echo 'Usage: gituser <athena_id>'
-    return 0
-  fi
-
-  case $1 in
-  peterkty) email=peterkty@gmail.com ;;
-  tayloro)  email=orion.thomas.taylor@gmail.com ;;
-  nikhilcd) email=nikhilcd@mit.edu ;;
-  nfazeli)  email=nfazeli@mit.edu ;;
-  diazlank) email=diazlank@mit.edu ;;
-  albertor) email=albertor@mit.edu ;;
-  *) echo "$1 is not in the list, please enter your athena id"; return 1 ;;
-  esac
-  
-  git config --global user.name $1
-  git config --global user.email $email
 }
 
 # some useful commands

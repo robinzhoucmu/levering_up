@@ -1,5 +1,5 @@
-[submodule "rosws/netft"]
-	path = catkin_ws/src/netft
+[submodule "ros_ws/netft"]
+	path = ros_ws/netft
 	url = git@github.mit.edu:mCube/netft.git
 [submodule "software/externals/lcm-pod"]
 	path = software/externals/lcm-pod
