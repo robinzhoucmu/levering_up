@@ -14,6 +14,41 @@ from netft_rdt_driver.srv import Zero
 from datetime import date
 import errno
 
+# Initiate Rosnode
+        
+rospy.init_node('straight_push')
+
+######### PARAMETERS ################
+
+# Grasp width Line= 35 Flat=29
+grasp_width =  29.0
+# Data directory (also used for file naming): "flat_contacts"; "line_contacts"
+data_dir = "flat_contacts"
+
+#Define call methods
+setCart = rospy.ServiceProxy('/robot1_SetCartesian', robot_SetCartesian)
+getCart = rospy.ServiceProxy('/robot1_GetCartesian', robot_GetCartesian)
+setJoint = rospy.ServiceProxy('/robot1_SetJoints', robot_SetJoints)
+setSpeed = rospy.ServiceProxy('/robot1_SetSpeed', robot_SetSpeed)
+homeGripper = rospy.ServiceProxy('/wsg_50_driver/homing', Empty)
+closeGripper = rospy.ServiceProxy('/wsg_50_driver/grasp', Move)
+openGripper = rospy.ServiceProxy('/wsg_50_driver/release', Move)
+setGripperForce = rospy.ServiceProxy('/wsg_50_driver/set_force', Conf)
+zeroSensorFingerFront = rospy.ServiceProxy('/netft_1/zero', Zero)
+zeroSensorFingerBack = rospy.ServiceProxy('/netft_2/zero', Zero)
+zeroSensorPusher = rospy.ServiceProxy('/netft_3/zero', Zero)
+
+
+
+# Default Orientation
+std_ori = np.array([0, -0.701,0.701,0])
+
+# List of velocities
+list_of_velocities = [15]
+
+# List of Gripping Forces 
+list_of_gripping_forces = [15]
+
 
 
 # Wait until goal position is reached 
@@ -44,46 +79,11 @@ def make_sure_path_exists(path):
             
 def move():
         
-        # Initiate Rosnode
-        
-        rospy.init_node('straight_push')
-        
-        ######### PARAMETERS ################
-        
-        # Grasp width Line= 35 Flat=29
-        grasp_width =  29.0
-        # Data directory (also used for file naming): "flat_contacts"; "line_contacts"
-        data_dir = "flat_contacts"
-        
-        #Define call methods
-        setCart = rospy.ServiceProxy('/robot1_SetCartesian', robot_SetCartesian)
-        getCart = rospy.ServiceProxy('/robot1_GetCartesian', robot_GetCartesian)
-        setJoint = rospy.ServiceProxy('/robot1_SetJoints', robot_SetJoints)
-        setSpeed = rospy.ServiceProxy('/robot1_SetSpeed', robot_SetSpeed)
-        homeGripper = rospy.ServiceProxy('/wsg_50_driver/homing', Empty)
-        closeGripper = rospy.ServiceProxy('/wsg_50_driver/grasp', Move)
-        openGripper = rospy.ServiceProxy('/wsg_50_driver/release', Move)
-        setGripperForce = rospy.ServiceProxy('/wsg_50_driver/set_force', Conf)
-        zeroSensorFingerFront = rospy.ServiceProxy('/netft_1/zero', Zero)
-        zeroSensorFingerBack = rospy.ServiceProxy('/netft_2/zero', Zero)
-        zeroSensorPusher = rospy.ServiceProxy('/netft_3/zero', Zero)
-        
         #Get date of today
         today = date.today()
         
-        # Default Orientation
-        std_ori = np.array([0, -0.701,0.701,0])
-        
-        # List of velocities
-        list_of_velocities = [10,15]
-        
-        # List of Gripping Forces 
-        list_of_gripping_forces = [15,20]
-        
         dir_save_bagfile = os.environ['PREPUSH2DATA_BASE'] + '/straight_push/%s_%s_%s/%s/' % (today.month,today.day,today.year,data_dir)
-        
         make_sure_path_exists(dir_save_bagfile)
-        
         
         for push_velocity in list_of_velocities:
             for gripping_force in list_of_gripping_forces:
@@ -189,7 +189,7 @@ def move():
     
 if __name__ == '__main__':
         try:
-                talker()
+                move()
         except rospy.ROSInterruptException:
                 pass
 
