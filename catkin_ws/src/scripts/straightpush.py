@@ -14,6 +14,13 @@ from netft_rdt_driver.srv import Zero
 from datetime import date
 import errno
 
+######### PARAMETERS ################
+
+# Grasp width Line= 35 Flat=29
+grasp_width =  29.0
+# Data directory (also used for file naming): "flat_contacts"; "line_contacts"
+data_dir = "flat_contacts"
+
 #Define call methods
 setCart = rospy.ServiceProxy('/robot1_SetCartesian', robot_SetCartesian)
 getCart = rospy.ServiceProxy('/robot1_GetCartesian', robot_GetCartesian)
@@ -60,20 +67,22 @@ today = date.today()
 std_ori = np.array([0, -0.701,0.701,0])
 
 # List of velocities
-list_of_velocities = [15,20]
+list_of_velocities = [10,15]
 
 # List of Gripping Forces 
-list_of_gripping_forces = [10,15,20,25,30]
+list_of_gripping_forces = [15,20]
 
-dir_save_bagfile = os.environ['PREPUSH2DATA_BASE'] + '/straight_push/%s_%s_%s/' % (today.month,today.day,today.year)
+dir_save_bagfile = os.environ['PREPUSH2DATA_BASE'] + '/straight_push/%s_%s_%s/%s/' % (today.month,today.day,today.year,data_dir)
 
 make_sure_path_exists(dir_save_bagfile)
 
 
 for push_velocity in list_of_velocities:
     for gripping_force in list_of_gripping_forces:
+            
+        rospy.loginfo("Straight push with velocity: %.2f mm/s and gripping force = %.2f N", push_velocity, gripping_force)
         
-        name_of_bag = 'straight_push_%s%s%s_vel=%.2f_gfrc=%.2f' % (today.month, today.day, today.year, push_velocity, gripping_force)
+        name_of_bag = 'straight_push_%s_%s%s%s_vel=%.2f_gfrc=%.2f' % (data_dir,today.month, today.day, today.year, push_velocity, gripping_force)
         
         # Set Speed 
         setSpeed(20,2)
@@ -108,7 +117,7 @@ for push_velocity in list_of_velocities:
         wait_for_goal_position(grasp_pose)
         
         #Close Gripper 
-        closeGripper(35,1)
+        closeGripper(grasp_width,1)
         
         #Retract 
         setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
@@ -116,13 +125,13 @@ for push_velocity in list_of_velocities:
         
         #GotoPusher 
         setSpeed(40,2)
-        goto_pusher_pos=np.array([365,200,274])
+        goto_pusher_pos=np.array([365,214,275])
         setCart(goto_pusher_pos[0],goto_pusher_pos[1],goto_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
         wait_for_goal_position(goto_pusher_pos)
         
         #ApproachPusher
         setSpeed(5,2)
-        approach_pusher_pos=np.array([365,237.6,274])
+        approach_pusher_pos=np.array([365,252,275])
         setCart(approach_pusher_pos[0],approach_pusher_pos[1],approach_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
         wait_for_goal_position(approach_pusher_pos)
         
