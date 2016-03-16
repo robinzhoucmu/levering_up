@@ -6,6 +6,7 @@ import numpy as np
 import rospy
 import subprocess 
 import roslib; roslib.load_manifest("robot_comm")
+import httplib
 from robot_comm.srv import *
 from wsg_50_common.srv import *
 from std_srvs.srv  import Empty 
@@ -13,6 +14,7 @@ roslib.load_manifest("netft_rdt_driver")
 from netft_rdt_driver.srv import Zero
 from datetime import date
 import errno
+#import pdb
 
 # Initiate Rosnode
         
@@ -37,26 +39,44 @@ setGripperForce = rospy.ServiceProxy('/wsg_50_driver/set_force', Conf)
 zeroSensorFingerFront = rospy.ServiceProxy('/netft_1/zero', Zero)
 zeroSensorFingerBack = rospy.ServiceProxy('/netft_2/zero', Zero)
 zeroSensorPusher = rospy.ServiceProxy('/netft_3/zero', Zero)
+startRecording = rospy.ServiceProxy('/panasonic_remote/start_rec', Empty)
+stopRecording = rospy.ServiceProxy('/panasonic_remote/stop_rec', Empty)
 
+
+# X distance to contact plane
 
 
 # Default Orientation
-std_ori = np.array([0, -0.701,0.701,0])
+std_ori = np.array([0, 0.7071,-0.7071,0])
 
 # List of velocities
 list_of_velocities = [10,15,20]
 
 # List of Gripping Forces 
-list_of_gripping_forces = [15,20,25]
+list_of_gripping_forces = [15,30]
 
 # List of angles in degrees
-list_of_angles = [-20,-10,0,10,20]
+list_of_angles = [0]#[-20,-10,0,10,20,25]
 
 # Pushing distance projected on ground in mm
-push_distance=20
+push_distance=15.0
+
+# Distance from front of object to center of mass
+
 
 # Distance from sensor to Object before contact in mm
-before_contact_distance=5
+# Negative value means initial position reqires pushing.
+init_push=4.0
+
+# Contact pose along X
+# Front plane of object to center of mass + origin to contact plane of sensor
+contact_pose = 107.5
+
+# Ground position in Z
+ground_pose_x = -143.0
+
+# Default position of center of gravity on ground
+default_CG_on_ground_x = 140.0
 
 
 # Wait until goal position is reached 
@@ -87,10 +107,11 @@ def make_sure_path_exists(path):
             
 def move():
         
+               
         #Get date of today
         today = date.today()
         
-        dir_save_bagfile = os.environ['PREPUSH2DATA_BASE'] + '/angle_push/%s_%s_%s/%s/final/' % (today.month,today.day,today.year,data_dir)
+        dir_save_bagfile = os.environ['PREPUSH2DATA_BASE'] + '/angle_push/%s_%s_%s/%s/CoM_teting/' % (today.month,today.day,today.year,data_dir)
         make_sure_path_exists(dir_save_bagfile)
         
         count=1
@@ -99,20 +120,20 @@ def move():
             for gripping_force in list_of_gripping_forces:
                     for angle in list_of_angles:
                     
-                        rospy.loginfo("Straight push with velocity: %.2f mm/s and gripping force = %.2f N and angle = %.2f degree. ExpNo: %s", push_velocity, gripping_force,angle,count)
+                        rospy.loginfo("Anglular push with velocity: %.2f mm/s and gripping force = %.2f N and angle = %.2f degree. ExpNo: %s", push_velocity, gripping_force,angle,count)
                         
-                        name_of_bag = 'straight_push_%s_%s%s%s_vel=%.2f_gfrc=%.2f_angl=%.2f' % (data_dir,today.month, today.day, today.year, push_velocity, gripping_force,angle)
+                        name_of_bag = 'angle_push_%s_%s%s%s_vel=%.2f_gfrc=%.2f_angl=%.2f' % (data_dir,today.month, today.day, today.year, push_velocity, gripping_force,angle)
                         
                         # Set Speed 
                         setSpeed(20,2)
                         
                         setGripperForce(gripping_force)
-                                
-                        # Move to Home Pose 
-                        #home_pose=np.array([365,0,360])
-                        #setCart(home_pose[0],home_pose[1],home_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3])
-                        #wait_for_goal_position(home_pose)
                         
+                        #Calculate X and Y component of push distance
+                        push_distance_x = push_distance*np.cos(angle*np.pi/180)
+                        push_distance_z = np.sin(angle*np.pi/180)*push_distance
+                                
+                                            
                         #Home Gripper 
                         homeGripper()
                         
@@ -122,19 +143,19 @@ def move():
                         zeroSensorFingerBack()
                         zeroSensorPusher()
                         
-                        raw_input("Ready? Press Enter to continue...")
-                        
+                        #raw_input("Ready? Press Enter to continue...")
+                        #pdb.set_trace()
                         # Move to Approach Pose 
                         setSpeed(60,2)
-                        approach_pose=np.array([365,58,200])
-                        approach_pose[1]-=push_distance
+                        approach_pose=np.array([default_CG_on_ground_x,-75,-120])
+                        approach_pose[0]+=(push_distance_x+init_push)/2.0
                         setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(approach_pose)
                         
                         #Move to Grasp Pose 
                         setSpeed(5,2)
                         grasp_pose=np.copy(approach_pose)
-                        grasp_pose[2]=168.1
+                        grasp_pose[2]=ground_pose_x
                         setCart(grasp_pose[0],grasp_pose[1],grasp_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(grasp_pose)
                         
@@ -147,31 +168,35 @@ def move():
                         
                         #GotoPusher 
                         setSpeed(40,2)
-                        goto_pusher_pos=np.array([365,214,275])
+                        goto_pusher_pos=np.array([130,-75,-35.5])
                         setCart(goto_pusher_pos[0],goto_pusher_pos[1],goto_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(goto_pusher_pos)
                         
-                        #ApproachPusher
+                        #Initial Push
                         setSpeed(5,2)
-                        approach_pusher_pos=np.array([365,252,275])
-                        approach_pusher_pos[1]-=before_contact_distance
+                        approach_pusher_pos=np.array([contact_pose+push_distance_x/2.0-init_push/2.0,-75,-35.5])#116
                         setCart(approach_pusher_pos[0],approach_pusher_pos[1],approach_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(approach_pusher_pos)
                         
-                        #Wait for user input
-                        #raw_input("Check orientation of object. Press Enter to continue...")
-                        
+                                               
                         #start recording rosbag
-                        topics = ["/netft_1/netft_data","/netft_2/netft_data","/netft_3/netft_data","/robot1_CartesianLog","/vicon/PrePushObj/PrePushObj"]
+                        topics = ["/netft_1/netft_data","/netft_2/netft_data","/netft_3/netft_data","/robot1_CartesianLog","/viconObject","/panasonic_remote/Vid_No"]
                         rosbag_proc = subprocess.Popen('rosbag record -q -O %s %s' % (name_of_bag, " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
+                        
+                        #start video 
+                        
+                        startRecording()
+                        rospy.sleep(1)
                         
                         #Push
                         setSpeed(push_velocity,1)
                         push_pos=np.copy(approach_pusher_pos)
-                        push_pos[1]+=push_distance+before_contact_distance
-                        push_pos[2]+=np.tan(angle*np.pi/180)*push_distance
+                        push_pos[0]= contact_pose - push_distance_x/2.0 - init_push/2.0
+                        push_pos[2]+= push_distance_z
                         setCart(push_pos[0],push_pos[1],push_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(push_pos)
+                        
+                        rospy.sleep(1)
                         
                         terminate_ros_node("/record")
                         
@@ -180,29 +205,31 @@ def move():
                         setCart(approach_pusher_pos[0],approach_pusher_pos[1],approach_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(approach_pusher_pos)
                         
+                        #stop video 
+                        stopRecording()
+                        
                         #Goto Place Position
                         setSpeed(40,2)
-                        place_pos=np.array([365,58,200])
+                        place_pos=np.array([default_CG_on_ground_x-push_distance_x/2.0- init_push/2.0,-75,-120])
                         setCart(place_pos[0],place_pos[1],place_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3])
                         wait_for_goal_position(place_pos)
                         
                         # Approach place 
                         setSpeed(5,2)
-                        approach_place_pos=np.array([365,58,172])
+                        approach_place_pos=np.copy(place_pos)
+                        approach_place_pos[2]=ground_pose_x
                         setCart(approach_place_pos[0],approach_place_pos[1],approach_place_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(approach_place_pos)
-                        openGripper(50,2)
+                        openGripper(40,2)
                         
                         #Retract
+                        setSpeed(20,2)
                         setCart(place_pos[0],place_pos[1],place_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                         wait_for_goal_position(place_pos)
                         
-                        #Home 
-                        #setSpeed(60,2)
-                        #setCart(home_pose[0],home_pose[1],home_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3])
-                        #wait_for_goal_position(home_pose)
-                        
+                                               
                         count+=1
+                        
     
 if __name__ == '__main__':
         try:
