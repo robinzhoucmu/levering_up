@@ -6,6 +6,12 @@
   <node name="netft_1"  pkg="netft_rdt_driver" type="netft_node" args= "--address 192.168.125.3 --rate 100" ns="netft_1"/>
   <node name="netft_2"  pkg="netft_rdt_driver" type="netft_node" args= "--address 192.168.125.4 --rate 100" ns="netft_2"/>
    <node name="netft_3"  pkg="netft_rdt_driver" type="netft_node" args= "--address 192.168.125.5 --rate 100" ns="netft_3"/>
-  <node pkg="robot_node" type="robot_node" name="robot_node1" output="screen" args="1"/>
+ 
+  <node pkg="robot_node" type="robot_node" name="robot_node1" output="screen" args="1">
+        <remap from="/robot1_RosJointState" to="joint_states" />
+    </node>
+    <node name="panasonic_remote"  pkg="prepush2" type="panasonic_remote.py" ns="panasonic_remote"/>
+    
+
   
 </launch>

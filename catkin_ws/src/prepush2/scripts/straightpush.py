@@ -44,10 +44,10 @@ zeroSensorPusher = rospy.ServiceProxy('/netft_3/zero', Zero)
 std_ori = np.array([0, -0.701,0.701,0])
 
 # List of velocities
-list_of_velocities = [15]
+list_of_velocities = [15,20]
 
 # List of Gripping Forces 
-list_of_gripping_forces = [15]
+list_of_gripping_forces = [15,20]
 
 
 
@@ -114,13 +114,13 @@ def move():
                 
                 # Move to Approach Pose 
                 setSpeed(60,2)
-                approach_pose=np.array([329,-25,200])
+                approach_pose=np.array([365,58,200])
                 setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                 wait_for_goal_position(approach_pose)
                 
                 #Move to Grasp Pose 
                 setSpeed(5,2)
-                grasp_pose=np.array([329,-25,168.1])
+                grasp_pose=np.array([365,58,168.1])
                 setCart(grasp_pose[0],grasp_pose[1],grasp_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                 wait_for_goal_position(grasp_pose)
                 
@@ -139,7 +139,7 @@ def move():
                 
                 #ApproachPusher
                 setSpeed(5,2)
-                approach_pusher_pos=np.array([365,252,275])
+                approach_pusher_pos=np.array([365,242,275])
                 setCart(approach_pusher_pos[0],approach_pusher_pos[1],approach_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                 wait_for_goal_position(approach_pusher_pos)
                 
@@ -147,7 +147,7 @@ def move():
                 raw_input("Check orientation of object. Press Enter to continue...")
                 
                 #start recording rosbag
-                topics = ["/netft_1/netft_data","/netft_2/netft_data","/netft_3/netft_data","/robot1_CartesianLog"]
+                topics = ["/netft_1/netft_data","/netft_2/netft_data","/netft_3/netft_data","/robot1_CartesianLog","/vicon/PrePushObj/PrePushObj"]
                 rosbag_proc = subprocess.Popen('rosbag record -q -O %s %s' % (name_of_bag, " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
                 
                 #Push

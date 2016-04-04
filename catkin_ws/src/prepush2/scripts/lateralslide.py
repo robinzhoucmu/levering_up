@@ -82,7 +82,7 @@ def move():
         #Get date of today
         today = date.today()
         
-        dir_save_bagfile = os.environ['PREPUSH2DATA_BASE'] + '/lateral_slide_up_down/%s_%s_%s/%s/' % (today.month,today.day,today.year,data_dir)
+        dir_save_bagfile = os.environ['PREPUSH2DATA_BASE'] + '/lateral_slide/%s_%s_%s/%s/' % (today.month,today.day,today.year,data_dir)
         make_sure_path_exists(dir_save_bagfile)
         
         count=1
@@ -111,12 +111,12 @@ def move():
                 # Zero Sensors
                 zeroSensorFingerFront()
                
-                raw_input("Ready? Press Enter to continue...")
+               
                 
                 # Move to Approach Pose 
                 setSpeed(60,2)
                 approach_pose=np.array([2,-75.0,-37])
-                approach_pose[2]-=slide_distance/2
+                approach_pose[1]-=slide_distance/2
                 setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                 wait_for_goal_position(approach_pose)
                 
@@ -137,7 +137,7 @@ def move():
                 #Slide
                 setSpeed(slide_velocity,1)
                 slide_pos=np.copy(approach_pose)
-                slide_pos[2]+=slide_distance
+                slide_pos[1]+=slide_distance
                 setCart(slide_pos[0],slide_pos[1],slide_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                 wait_for_goal_position(slide_pos)
                 
