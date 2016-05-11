@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <rosparam command="load" file="$(find parameters)/systemParams.yaml"/>
-  <rosparam command="load" file="$(find parameters)/mcubeRobotParams.yaml"/>
+  <rosparam command="load" file="$(find prepush2_config)/parameters/prepush2setup.yaml"/>
   <node name="wsg_50_driver"  pkg="wsg_50_driver" type="wsg_50_ip" args= "--ip 192.168.126.5 --port 1000"/>
   <node name="netft_1"  pkg="netft_rdt_driver" type="netft_node" args= "--address 192.168.125.3 --rate 100" ns="netft_1"/>
   <node name="netft_2"  pkg="netft_rdt_driver" type="netft_node" args= "--address 192.168.125.4 --rate 100" ns="netft_2"/>
@@ -10,7 +10,7 @@
   <node pkg="robot_node" type="robot_node" name="robot_node1" output="screen" args="1">
         <remap from="/robot1_RosJointState" to="joint_states" />
     </node>
-    <!--node name="panasonic_remote"  pkg="prepush2" type="panasonic_remote.py" ns="panasonic_remote"/-->
+    <!--node name="panasonic_remote"  pkg="prepush2" type="panasonic_remote.py" ns="panasonic_remote"/!-->
     
 
   
