@@ -40,33 +40,6 @@ setup_prepush2()
   
   export PATH=$PATH:$HOME/software/ffmpeg-2.4.2-64bit-static # for ffmpeg software
   
-  if [ "$HOSTNAME" == 'mcube-002' ] || [ "$HOSTNAME" == 'mcube-004' ] || [ "$HOSTNAME" == 'mcube-005' ]; then
-    export ROS_MASTER_URI=http://mcube-002:11311
-  fi  
-  if [ "$HOSTNAME" == 'mcube-003' ] || [ "$HOSTNAME" == 'mcube-006' ] || [ "$HOSTNAME" == 'mcube-007' ]; then
-    export ROS_MASTER_URI=http://mcube-003:11311
-  fi
-  if [ "$HOSTNAME" == 'mcube-003' ]; then
-    export ROS_HOSTNAME=mcube-003
-    export ROS_IP=192.168.37.13
-  fi
-  if [ "$HOSTNAME" == 'mcube-006' ]; then
-    export ROS_HOSTNAME=mcube-006
-    export ROS_IP=192.168.37.12
-  fi
-  if [ "$HOSTNAME" == 'mcube-005' ]; then
-    export ROS_HOSTNAME=mcube-005
-    export ROS_IP=192.168.37.10
-  fi
-  if [ "$HOSTNAME" == 'mcube-004' ]; then
-    export ROS_HOSTNAME=mcube-004
-    export ROS_IP=192.168.37.9
-  fi
-  if [ "$HOSTNAME" == 'mcube-002' ]; then
-    export ROS_HOSTNAME=mcube-002
-    export ROS_IP=192.168.37.7
-  fi
-  
   export ROSLAUNCH_SSH_UNKNOWN=1
   
   #set main git user
