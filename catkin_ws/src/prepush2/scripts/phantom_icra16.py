@@ -42,7 +42,7 @@ releaseGripper = rospy.ServiceProxy('/wsg_50_driver/release', Move)
 toolZ=0.0
 # Tool frame is set to fingertip of the long gripper finger
 # Work object is set to external finger
-
+#~ 
 # 1. Start with gripper closed(phantom finger close to other finger)
 #1.1 Move gripper 100 mm away from external finger in X direction
 setSpeed(80,40)
@@ -158,50 +158,58 @@ setCart(100, 0, toolZ, 0, -0.7071, 0.7071, 0)
 # ------------- Object pushing Section-------------------
 # -------------------------------------------------------
 
+setJoints(-44.92,-12.88,35.25,110.89,49.09,-120.24)
+setCart(100, 0, toolZ, 0, -0.7071, 0.7071, 0)
 #~ #9 Pick up an object from ground
-#~ moveGripper(65, 10)
-#~ # go to pick pose
-#~ setSpeed(100,50)
-#~ setCart(250, 0, toolZ-50, 0, -0.7071, 0.7071, 0)
-#~ setCart(250, 0, toolZ-70, 0, -0.7071, 0.7071, 0)
-#~ setCart(250, 0, toolZ-93, 0, -0.7071, 0.7071, 0)
-#~ 
-#~ # grasp the object
-#~ setGripperForce(10.0)
-#~ graspGripper(40,20)
-#~ 
-#~ #lift the gripper up
-#~ setCart(250, 0, toolZ, 0, -0.7071, 0.7071, 0)
-#~ setZone(1)
+moveGripper(65, 10)
+# go to pick pose
+setSpeed(100,50)
+setCart(175, 0, toolZ-50, 0, -0.7071, 0.7071, 0)
+rospy.sleep(3)
+setCart(225, -155, toolZ-50, 0, -0.7071, 0.7071, 0)
+setCart(225, -155, toolZ-70, 0, -0.7071, 0.7071, 0)
+setCart(225, -155, toolZ-90, 0, -0.7071, 0.7071, 0)
+
+# grasp the object
+setGripperForce(20.0)
+graspGripper(40,20)
+
+#lift the gripper up
+setCart(225, -155, toolZ-50, 0, -0.7071, 0.7071, 0)
+setZone(1)
+setCart(175, 0, toolZ-50, 0, -0.7071, 0.7071, 0)
+
+rospy.sleep(3)
+setCart(70, 0, toolZ+2, 0, -0.7071, 0.7071, 0)
 #~ # move in front of phantom finger
-#~ setCart(70, 0, toolZ+2, 0, -0.7071, 0.7071, 0)
-#~ 
-#~ # Push the object from one side
-#~ setSpeed(15,10)
-#~ setCart(40, 0, toolZ+2, 0, -0.7071, 0.7071, 0)
-#~ 
-#~ # release contact
-#~ setCart(100, 0, toolZ+2, 0, -0.7071, 0.7071, 0)
-#~ 
-#~ #move the finger to other side by rotating around the gripper
-#~ setSpeed(100,50)
-#~ setCart(80, 0, toolZ+2, 0, 0, 1, 0)
-#~ setCart(65, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
-#~ 
-#~ #correct the push.
-#~ setSpeed(15,10)
-#~ setCart(55, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
-#~ setCart(65, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
-#~ setCart(50, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
-#~ 
-#~ # Take away the finger
-#~ setSpeed(100,50)
-#~ setCart(100, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
-#~ 
-#~ setCart(240, 0, 0, 0, -0.7071, 0.7071, 0)
-#~ 
-#~ setCart(240, 0, -85, 0, -0.7071, 0.7071, 0)
-#~ 
-#~ moveGripper(65,20)
-#~ 
-#~ setCart(100, 0, 0, 0, -0.7071, 0.7071, 0)
+setCart(70, 0, toolZ+2, 0, -0.7071, 0.7071, 0)
+
+# Push the object from one side
+setSpeed(15,10)
+setCart(40, 0, toolZ+2, 0, -0.7071, 0.7071, 0)
+
+# release contact
+setCart(100, 0, toolZ+2, 0, -0.7071, 0.7071, 0)
+
+#move the finger to other side by rotating around the gripper
+setSpeed(100,50)
+setCart(80, 0, toolZ+2, 0, 0, 1, 0)
+setCart(65, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
+
+#correct the push.
+setSpeed(50,25)
+setCart(55, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
+setCart(60, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
+setCart(45, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
+
+# Take away the finger
+setSpeed(100,50)
+setCart(100, 0, toolZ+2, 0, 0.7071, 0.7071, 0)
+
+setCart(200, 0, 0, 0, -0.7071, 0.7071, 0)
+setCart(225, -155, toolZ-70, 0, -0.7071, 0.7071, 0)
+setCart(225, -155, toolZ-85, 0, -0.7071, 0.7071, 0)
+
+moveGripper(65,20)
+
+setCart(100, 0, 0, 0, -0.7071, 0.7071, 0)
