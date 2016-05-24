@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <rosparam command="load" file="$(find parameters)/systemParams.yaml"/>
+  <rosparam command="load" file="$(find prepush2_config)/parameters/phantomphalange.yaml"/>
+  <node name="wsg_50_driver"  pkg="wsg_50_driver" type="wsg_50_ip" args= "_ip:=192.168.126.5 _port:=1000"/>
+  
+  <node pkg="robot_node" type="robot_node" name="robot_node1" output="screen" args="1">
+        <remap from="/robot1_RosJointState" to="joint_states" />
+    </node>
+    <!--node name="panasonic_remote"  pkg="prepush2" type="panasonic_remote.py" ns="panasonic_remote"/!-->
+    
+
+  
+</launch>
