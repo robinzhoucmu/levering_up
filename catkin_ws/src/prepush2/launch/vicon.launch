@@ -19,13 +19,13 @@
         
          <node pkg="tf" type="static_transform_publisher" name="viconworldlink_broadcaster" 
   args=" 2.83585749e-01 3.95007535e-03 -1.51204644e-01 4.44450343e-02 -2.01212276e-02 7.07934448e-01 7.04591082e-01 /work_obj /viconworld 100" />
+<!--
         <param name="vicon_obj_topic" type="str" value="/vicon/PrePushObj/PrePushObj"/>
+-->
 <!--
         <param name="vicon_obj_topic" type="str" value="/vicon/pivot_obj/pivot_obj"/>
 -->
-<!--
         <param name="vicon_obj_topic" type="str" value="/vicon/cyl_roll/cyl_roll"/>
--->
         <node pkg="prepush2" type="vicon_transformer.py" name="vicon_transformer"/>
   
   

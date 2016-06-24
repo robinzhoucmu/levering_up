@@ -136,8 +136,8 @@ def move(directory):
                             
                 name_of_bag = 'vel=%.2f_gfrc=%.2f_run=%d' % (push_velocity, gripping_force,run_count)
                 
-                bagfilepath1 = dir_save_bagfile+name_of_bag+"_first.bag"
-                bagfilepath2 = dir_save_bagfile+name_of_bag+"_second.bag"
+                bagfilepath1 = dir_save_bagfile+name_of_bag+"_A.bag"
+                bagfilepath2 = dir_save_bagfile+name_of_bag+"_B.bag"
                 
                 rospy.loginfo("Name of bagfile: %s",name_of_bag)
                 if skip_when_exists and os.path.isfile(bagfilepath1) and os.path.isfile(bagfilepath2):
@@ -180,7 +180,7 @@ def move(directory):
                     topics = ["/netft_1/netft_data","/netft_2/netft_data","/robot1_CartesianLog","/viconObject","/panasonic_remote/Vid_No"]
                 else:
                     topics = ["/netft_1/netft_data","/netft_2/netft_data","/robot1_CartesianLog","/viconObject"]
-                rosbag_proc = subprocess.Popen('rosbag record -q -O %s%s %s' % (name_of_bag,"_first", " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
+                rosbag_proc = subprocess.Popen('rosbag record -q -O %s%s %s' % (name_of_bag,"_A", " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
                 rospy.sleep(1)
                 
                 # Set speed 
@@ -198,7 +198,7 @@ def move(directory):
                     topics = ["/netft_1/netft_data","/netft_2/netft_data","/robot1_CartesianLog","/viconObject","/panasonic_remote/Vid_No"]
                 else:
                     topics = ["/netft_1/netft_data","/netft_2/netft_data","/robot1_CartesianLog","/viconObject"]
-                rosbag_proc = subprocess.Popen('rosbag record -q -O %s%s %s' % (name_of_bag,"_second", " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
+                rosbag_proc = subprocess.Popen('rosbag record -q -O %s%s %s' % (name_of_bag,"_B", " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
                 rospy.sleep(1)
                 
                 # They see me rollin' back
