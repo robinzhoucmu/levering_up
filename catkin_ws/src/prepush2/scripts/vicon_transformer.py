@@ -43,5 +43,5 @@ if __name__ == '__main__':
         except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
             continue 
             
-    rospy.Subscriber("/vicon/PrePushObj/PrePushObj", TransformStamped, callback)
+    rospy.Subscriber(rospy.get_param("vicon_obj_topic"), TransformStamped, callback)
     rospy.spin()
