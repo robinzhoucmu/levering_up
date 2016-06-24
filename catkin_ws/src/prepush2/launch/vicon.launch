@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
 	<node pkg="vicon_bridge" type="vicon_bridge" name="vicon" output="screen">
 		<param name="stream_mode" value="ClientPull" type="str" />
@@ -11,14 +12,20 @@
     
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" />
         
-        <node pkg="tf" type="static_transform_publisher" name="baselink_broadcaster" args="0.4865 0 0.60 -0.5 0.5 0.5 0.5 map base_link 100" />
+        <node pkg="tf" type="static_transform_publisher" name="baselink_broadcaster" args="0.4865 0 0.60 -0.5 0.5 0.5 0.5 map base_link 100" />  
         <node pkg="tf" type="static_transform_publisher" name="work_obj_broadcaster" args="0.297 0.365 0.164 0 0 0 1 map work_obj 100" />  
                 
-        <node pkg="tf" type="static_transform_publisher" name="vicontip_broadcaster" args="0 0 0.2035 0 0 0 /link_6 /vicon_tip 100" /> <!-- for transferring calib tip to link6-->
+        <node pkg="tf" type="static_transform_publisher" name="vicontip_broadcaster" args="0 0 0.18 0 0 0 /link_6 /vicon_tip 100" /> <!-- for transferring calib tip to link6-->
         
          <node pkg="tf" type="static_transform_publisher" name="viconworldlink_broadcaster" 
-  args=" 3.49909257e-02 -7.21089545e-02 -1.59838944e-01 1.70911620e-02 9.67553673e-03 -7.02905178e-01 7.11012367e-01 /work_obj /viconworld 100" />
-  
+  args=" 2.83585749e-01 3.95007535e-03 -1.51204644e-01 4.44450343e-02 -2.01212276e-02 7.07934448e-01 7.04591082e-01 /work_obj /viconworld 100" />
+        <param name="vicon_obj_topic" type="str" value="/vicon/PrePushObj/PrePushObj"/>
+<!--
+        <param name="vicon_obj_topic" type="str" value="/vicon/pivot_obj/pivot_obj"/>
+-->
+<!--
+        <param name="vicon_obj_topic" type="str" value="/vicon/cyl_roll/cyl_roll"/>
+-->
         <node pkg="prepush2" type="vicon_transformer.py" name="vicon_transformer"/>
   
   
