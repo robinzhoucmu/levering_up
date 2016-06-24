@@ -25,13 +25,14 @@ import tf.transformations as tfm
 from ik.ik import setSpeed
 
 #limits = [0.32, 0.38, -0.2, +0.1, 0.27, 0.27]  #[xmin, xmax, ymin, ymax, zmin, zmax]
-limits = [0.07, 0.15, -0.1, +0.05, -0.05, 0.0]  #[xmin, xmax, ymin, ymax, zmin, zmax]
+limits = [0.07, 0.2, -0.1, +0.05, -0.05, 0.0]  #[xmin, xmax, ymin, ymax, zmin, zmax]
 nseg = [5, 5, 3]
 ori = [0, -0.7071, 0.7071, 0]
 globalacc = 2             # some big number means no limit, in m/s^2
 
 rospy.init_node('vicon_vs_robot')
 setCartRos = rospy.ServiceProxy('/robot1_SetCartesian', robot_SetCartesian)
+setJointRos = rospy.ServiceProxy('/robot1_SetJoints', robot_SetJoints)
 setZone = rospy.ServiceProxy('/robot1_SetZone', robot_SetZone)
 #setAcc = rospy.ServiceProxy('/robot1_SetAcc', robot_SetAcc)
 listener = tf.TransformListener()
@@ -59,6 +60,10 @@ yt = []
 zt = []
 setSpeed(100, 60)
 #setAcc(acc=globalacc, deacc=globalacc)
+
+#Go Home
+setJointRos(-2.24,25.29,48.0,-2.33,-73.31,0.67)
+
 
 for x in np.linspace(limits[0],limits[1], nseg[0]):
     for y in np.linspace(limits[2],limits[3], nseg[1]):
@@ -112,3 +117,38 @@ quat = tfm.quaternion_from_matrix(Rh)
 print 'vicon_T_robot:', " ".join('%.8e' % x for x in (t.tolist() + quat.tolist()))
 print 'rmse:', rmse
 
+################################################## hack: filter noisy points
+n = len(xs)
+A = viconpts
+B = robotpts
+A2 = np.dot(R,A.T) + np.tile(t, (n, 1)).T
+A2 = A2.T
+
+# Find the error
+err = A2 - B
+err = err * err
+err = sum(err.T)
+
+thres = 5e-3
+viconpts_filtered = np.array([[0,0,0]])
+robotpts_filtered = np.array([[0,0,0]])
+for i in xrange(0, len(xs)):
+    if err[i] < thres:
+        viconpts_filtered = np.vstack([viconpts_filtered, viconpts[i,:]])
+        robotpts_filtered = np.vstack([robotpts_filtered, robotpts[i,:]])
+viconpts_filtered = viconpts_filtered[1::,:]
+robotpts_filtered = robotpts_filtered[1::,:]
+
+(R,t,rmse) = rigid_transform_3D(viconpts_filtered, robotpts_filtered)  # then you'll get vicon frame wrt robot frame
+
+Rh = tfm.identity_matrix()
+Rh[np.ix_([0,1,2],[0,1,2])] = R
+quat = tfm.quaternion_from_matrix(Rh)
+
+print 'vicon_T_robot:', " ".join('%.8e' % x for x in (t.tolist() + quat.tolist()))
+print 'rmse:', rmse
+
+plt.scatter(viconpts_filtered[:,0], viconpts_filtered[:,1], c='r', marker='o')
+plt.scatter(robotpts_filtered[:,0], robotpts_filtered[:,1], c='b', marker='o')
+
+plt.show()
