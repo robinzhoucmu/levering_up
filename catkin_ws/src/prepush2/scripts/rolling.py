@@ -39,19 +39,20 @@ rec_vid = False
 skip_when_exists = True
 
 # List of velocities
-list_of_velocities = [10,15,20,25] 
+list_of_velocities = [5,10,15,20,25] 
 
 # List of Gripping Forces 
-list_of_gripping_forces = [3,4,5,10]
+list_of_gripping_forces = [3,4,5,6,7,8,9,10]
 
 # Threshold for initial orientation check about z
 init_ori_thresh = 0.07
 
 # Operating Height
-plate_height = -181.09 + 82.0
+# plate_height = -181.09 + 82.0
+plate_height = -181.09 + 70.0
 
 # Operating X position
-rolling_x = 220.0 
+rolling_x =260.0 #220.0 
 
 # Up distance before grasping
 approach_dist = 60.0

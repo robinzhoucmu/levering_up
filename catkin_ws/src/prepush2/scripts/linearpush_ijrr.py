@@ -55,19 +55,19 @@ skip_when_exists = True
 std_ori = np.array([0, -0.7071,0.7071,0])
 
 # Orientation checking threshold
-after_push_ori_thresh = 0.35
-before_push_ori_thresh = 0.18
+ori_thresh = 0.18
+
 # List of velocities
-list_of_velocities = [10,15,20,25] 
+list_of_velocities = [10] 
 
 # List of Gripping Forces 
-list_of_gripping_forces = [15,25,22,20,30,32,35]
+list_of_gripping_forces = [35,32,30,27,25,22,20,17,15,12,10,7,5]
 
 # List of angles in degrees
-list_of_angles = [0,10,-10,20,-20]
+list_of_angles = [0]
 
 # Pushing distance projected on ground in mm
-push_distance=15.0
+push_distance=20.0 #15.0
 
 # Number of runs per set of parameters
 num_runs = 3
@@ -82,16 +82,18 @@ init_push=5.0
 
 # Contact pose along X
 # Front plane of object to initial grasp finger position + origin to contact plane of sensor CG is at 98.0
-contact_pose = 101.0 #106 #Changed this for machined dobject
+contact_pose = 106 #107.5
 
 # Ground position in Z
 ground_pose_z = -180.5 #-181.0
 
 # Default grasp position on ground
-default_object_position_on_ground = 235.0 #240.0 #Changed this for machined dobject
+default_object_position_on_ground = 240.0
 
 #Safety distance to pusher
 safety_dist_push = 15.0
+
+
 
 # Initializing variables
 position_and_ori_checking = True
@@ -154,33 +156,19 @@ def check_obj_init_pose():
         lower_threshold = ideal_pos - 0.006
         if msg.transform.translation.x <  upper_threshold and msg.transform.translation.x > lower_threshold:
                 return True
-        if msg.transform.translation.x < 0.15:
-            rospy.logerr('Object too close to pusher ... stopping program')
-            if rec_vid:
-                stopRecording()
-            os.kill(os.getpid(), signal.SIGINT)
-            
         rospy.logwarn("Initial position is NOT ok. Expected between %f and %f, but measured: %f. Adjusting grasp pose.", upper_threshold ,lower_threshold, msg.transform.translation.x)
         object_position_on_ground -=  (ideal_pos - msg.transform.translation.x)*1000.0
         return False
         
-def check_obj_before_push_ori():
-        msg = rospy.wait_for_message("/viconObject", TransformStamped)
-        R = tfm.quaternion_matrix([msg.transform.rotation.x,msg.transform.rotation.y,msg.transform.rotation.z,msg.transform.rotation.w])
-        euler = tfm.euler_from_matrix(R, 'sxyz')
-        print euler
-        if euler[1] < before_push_ori_thresh  and euler[1] > -before_push_ori_thresh:
-                return True
-        return False
-
 def check_obj_after_push_ori():
         msg = rospy.wait_for_message("/viconObject", TransformStamped)
         R = tfm.quaternion_matrix([msg.transform.rotation.x,msg.transform.rotation.y,msg.transform.rotation.z,msg.transform.rotation.w])
         euler = tfm.euler_from_matrix(R, 'sxyz')
         print euler
-        if euler[1] < after_push_ori_thresh  and euler[1] > -after_push_ori_thresh:
+        if euler[1] < ori_thresh  and euler[1] > -ori_thresh:
                 return True
         return False
+        
             
 def move(contact_type):
 
@@ -195,8 +183,8 @@ def move(contact_type):
         
         count=1
         for gripping_force in list_of_gripping_forces:
-            if count > 1:
-                    rospy.sleep(30)
+            # if count > 1:
+                    # rospy.sleep(300)
             for push_velocity in list_of_velocities:
                     for angle in list_of_angles:
                         for run_count in range(num_runs):
@@ -239,7 +227,7 @@ def move(contact_type):
                                             rospy.loginfo("Initial position seems ok!")
                             
                             # Move to Approach Pose 
-                            setSpeed(60,30)
+                            setSpeed(80,30)
                             approach_pose=np.array([object_position_on_ground,center_y,-120])
                             setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                             wait_for_goal_position(approach_pose)
@@ -253,7 +241,6 @@ def move(contact_type):
                             
                             #Close Gripper 
                             closeGripper(grasp_width,1)
-                            rospy.sleep(1.0)
                             
                             #Retract 
                             setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
@@ -263,14 +250,14 @@ def move(contact_type):
                             initial_push_end_pos=np.array([contact_pose-init_push,center_y,-35.5])
                             
                             #GotoPusher 
-                            setSpeed(20,10)
+                            setSpeed(40,20)
                             goto_pusher_pos = np.copy(initial_push_end_pos)
                             goto_pusher_pos[0] +=  safety_dist_push
                             setCart(goto_pusher_pos[0],goto_pusher_pos[1],goto_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                             wait_for_goal_position(goto_pusher_pos)
                             
                             if position_and_ori_checking:
-                                    if not check_obj_before_push_ori():
+                                    if not check_obj_after_push_ori():
                                             rospy.logerr("Orientation is NOT ok. Shutdown.")
                                             os.kill(os.getpid(), signal.SIGINT)
                                     else:
@@ -281,7 +268,7 @@ def move(contact_type):
                                     startRecording()
                             
                             #Initial Push
-                            setSpeed(5,5)
+                            setSpeed(5,2)
                             setCart(initial_push_end_pos[0],initial_push_end_pos[1],initial_push_end_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                             wait_for_goal_position(initial_push_end_pos)
                             
@@ -310,7 +297,7 @@ def move(contact_type):
                             terminate_ros_node("/record")
                             
                             #Retract
-                            setSpeed(5,5)
+                            setSpeed(5,1)
                             retract_pusher_pos = np.copy(push_pos)
                             retract_pusher_pos[0] += safety_dist_push
                             setCart(retract_pusher_pos[0],retract_pusher_pos[1],retract_pusher_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
@@ -337,7 +324,7 @@ def move(contact_type):
                             wait_for_goal_position(place_pos)
                             
                             # Approach place 
-                            setSpeed(50,20)
+                            setSpeed(20,10)
                             approach_place_pos=np.copy(place_pos)
                             approach_place_pos[2]=ground_pose_z
                             setCart(approach_place_pos[0],approach_place_pos[1],approach_place_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
@@ -345,7 +332,7 @@ def move(contact_type):
                             openGripper(40,2)
                             
                             #Retract
-                            setSpeed(60,30)
+                            setSpeed(60,20)
                             setCart(place_pos[0],place_pos[1],place_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                             wait_for_goal_position(place_pos)
                             

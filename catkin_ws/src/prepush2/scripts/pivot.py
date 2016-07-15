@@ -60,10 +60,10 @@ std_ori_for_tfm = [std_ori[1],std_ori[2],std_ori[3],std_ori[0]]
 list_of_velocities = [10,15,20,25] 
 
 # List of Gripping Forces 
-list_of_gripping_forces = [35,32,30,27,25,22]
+list_of_gripping_forces = [35,32,30,27,25,22,20]
 
 # List offeset to specify distance from sensor center. Higher value means closer to earth
-list_of_push_offsets = [0,10,20,30,40] 
+list_of_push_offsets = [0,5,10,15,20,25] #[0,10,20,30,40] 
 
 # Pushing distance projected on ground in mm
 push_distance=15.0
@@ -75,21 +75,27 @@ num_runs = 3
 start_angle = 55.0
 
 # Distance from front of object to center of mass
-center_of_sensor_z = -35.5
+center_of_sensor_z = -37.25
+#-35.5 for flat contact
+#-37.25 for line contact
 
 #Operating height
 operating_z = -20.0
 
 # Distance from sensor to Object before contact in mm
 # Negative value means initial position reqires pushing.
-init_push=0.0
+
+#For line contact
+init_push1=0.95
+init_push2=0.5
+# init_push1=init_push2=1.0 for flat external contact
 
 # Contact pose along X
 # Front plane of object to initial grasp finger position + origin to contact plane of sensor CG is at 98.0
-contact_pose = 70.0 #55.0
+contact_pose = 69.0#70.0 
 
 # Ground position in Z
-ground_pose_z = -178.1# -143.0
+ground_pose_z = -179.0
 
 # Start placing height 
 start_placing_z = ground_pose_z  + 75.0
@@ -164,10 +170,11 @@ def check_obj_init_pose():
         global object_position_on_ground
         msg = rospy.wait_for_message("/viconObject", TransformStamped)
         ideal_pos = default_object_position_on_ground/1000.0 #- 0.017#0.019
-        upper_threshold = ideal_pos + 0.006
-        lower_threshold = ideal_pos - 0.006
-        if msg.transform.translation.x <  upper_threshold and msg.transform.translation.x > lower_threshold:
-                return True
+        upper_threshold = ideal_pos + 0.003
+        lower_threshold = ideal_pos - 0.003
+        # uncomment the followig line for flat external contact
+        # if msg.transform.translation.x <  upper_threshold and msg.transform.translation.x > lower_threshold:
+                # return True
         if msg.transform.translation.x < 0.25:
             rospy.logerr('Object too close to pusher ... stopping program')
             if rec_vid:
@@ -175,6 +182,7 @@ def check_obj_init_pose():
             os.kill(os.getpid(), signal.SIGINT)
         rospy.logwarn("Initial position is NOT ok. Expected between %f and %f, but measured: %f. Adjusting grasp pose.", upper_threshold ,lower_threshold, msg.transform.translation.x)
         object_position_on_ground -=  (ideal_pos - msg.transform.translation.x)*1000.0
+        object_position_on_ground=object_position_on_ground+3.0 # comment this line for flat external contact
         return False
         
 def check_obj_after_push_ori():
@@ -215,6 +223,11 @@ def move(contact_type):
                     rospy.sleep(1)#600)
             for push_velocity in list_of_velocities:
                     for push_offset in list_of_push_offsets:
+                        if push_offset>20.0:
+                            init_push=init_push2
+                        else:
+                            init_push=init_push1
+                            
                         for run_count in range(num_runs):
                             
                             # Set rosbag filename and directory
@@ -250,12 +263,12 @@ def move(contact_type):
                                             rospy.loginfo("Initial position seems ok!")
                             
                             # Move to Approach Pose 
-                            setSpeed(60,10)
+                            setSpeed(60,30)
                             approach_pose=np.array([object_position_on_ground,center_y,-120])
                             setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                             
                             #Move to Grasp Pose 
-                            setSpeed(5,10)
+                            setSpeed(20,10)
                             grasp_pose=np.copy(approach_pose)
                             grasp_pose[2]=ground_pose_z
                             grasp_ori = tfm.quaternion_multiply(tfm.quaternion_about_axis(((90.0-start_angle)/180.0)*np.pi,(0,-1,0)),std_ori_for_tfm)
@@ -263,6 +276,7 @@ def move(contact_type):
                             
                             #Close Gripper 
                             closeGripper(grasp_width,1)
+                            rospy.sleep(1.0)
                             
                             #Retract 
                             setCart(approach_pose[0],approach_pose[1],approach_pose[2],grasp_ori[3],grasp_ori[0],grasp_ori[1],grasp_ori[2]) 
@@ -273,7 +287,7 @@ def move(contact_type):
                             pivot_quaternions = pivot_traj(std_ori_for_tfm,start_angle,0.0)
                             
                             #GotoPusher 
-                            setSpeed(40,20)
+                            setSpeed(60,30)
                             goto_pusher_pos = np.copy(initial_push_end_pos)
                             goto_pusher_pos[0] +=  safety_dist_push
                             setCart(goto_pusher_pos[0],goto_pusher_pos[1],initial_push_end_pos[2],pivot_quaternions[0][3],pivot_quaternions[0][0],pivot_quaternions[0][1],pivot_quaternions[0][2]) 
@@ -290,7 +304,7 @@ def move(contact_type):
                                     startRecording()
                             
                             #Initial Push
-                            setSpeed(5,20)
+                            setSpeed(10,10)
                             setCart(initial_push_end_pos[0],initial_push_end_pos[1],initial_push_end_pos[2],pivot_quaternions[0][3],pivot_quaternions[0][0],pivot_quaternions[0][1],pivot_quaternions[0][2]) 
                             
                             #start recording rosbag
@@ -315,7 +329,7 @@ def move(contact_type):
                             terminate_ros_node("/record")
                             
                             #Retract
-                            setSpeed(5,20)
+                            setSpeed(20,10)
                             retract_pusher_pos = np.copy(push_pos)
                             retract_pusher_pos[0] += safety_dist_push
                             setCart(retract_pusher_pos[0],retract_pusher_pos[1],retract_pusher_pos[2],pivot_quaternions[-1][3],pivot_quaternions[-1][0],pivot_quaternions[-1][1],pivot_quaternions[-1][2]) 
@@ -336,14 +350,14 @@ def move(contact_type):
                                             
                             
                             #Goto Place Position
-                            setSpeed(40,20)
+                            setSpeed(60,30)
                             place_pos=np.array([default_object_position_on_ground + placing_distance,center_y,start_placing_z])
                             setCart(place_pos[0],place_pos[1],operating_z,place_ori_quat[3],place_ori_quat[0],place_ori_quat[1],place_ori_quat[2])
-                            setSpeed(5,20)
+                            setSpeed(30,20)
                             setCart(place_pos[0],place_pos[1],place_pos[2],place_ori_quat[3],place_ori_quat[0],place_ori_quat[1],place_ori_quat[2])
                             
                             # Approach place 
-                            setSpeed(5,20)
+                            setSpeed(30,15)
                             clearBuffer()
                             
                             # Generate circular motion
@@ -357,7 +371,7 @@ def move(contact_type):
                             openGripper(40,20)
                             
                             #Retract
-                            setSpeed(20,20)
+                            setSpeed(60,30)
                             setCart(default_object_position_on_ground,center_y,operating_z,std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                                                    
                             count+=1

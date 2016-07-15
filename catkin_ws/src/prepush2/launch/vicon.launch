@@ -22,10 +22,10 @@
 <!--
         <param name="vicon_obj_topic" type="str" value="/vicon/PrePushObj/PrePushObj"/>
 -->
-<!--
         <param name="vicon_obj_topic" type="str" value="/vicon/pivot_obj/pivot_obj"/>
--->
+<!--
         <param name="vicon_obj_topic" type="str" value="/vicon/cyl_roll/cyl_roll"/>
+-->
         <node pkg="prepush2" type="vicon_transformer.py" name="vicon_transformer"/>
   
   
