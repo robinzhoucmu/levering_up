@@ -26,9 +26,8 @@ rospy.init_node('angle_push')
 
 ######### PARAMETERS ################
 
-# Grasp width Line= 35 Flat=29
-grasp_width =  34.5
-
+# Grasp width square prism= 34.5, cylinder with Flat=29
+grasp_width =  29.0 # 34.5 
 
 #Define call methods
 setCart = rospy.ServiceProxy('/robot1_SetCartesian', robot_SetCartesian)
@@ -58,16 +57,16 @@ std_ori = np.array([0, -0.7071,0.7071,0])
 after_push_ori_thresh = 0.35
 before_push_ori_thresh = 0.18
 # List of velocities
-list_of_velocities = [10,15,20,25] 
+list_of_velocities = [25,20,15,10] 
 
 # List of Gripping Forces 
-list_of_gripping_forces = [15,25,22,20,30,32,35]
+list_of_gripping_forces = [25,22,20]
 
 # List of angles in degrees
 list_of_angles = [0,10,-10,20,-20]
 
 # Pushing distance projected on ground in mm
-push_distance=15.0
+push_distance=10.0#15.0
 
 # Number of runs per set of parameters
 num_runs = 3
@@ -82,7 +81,8 @@ init_push=5.0
 
 # Contact pose along X
 # Front plane of object to initial grasp finger position + origin to contact plane of sensor CG is at 98.0
-contact_pose = 101.0 #106 #Changed this for machined dobject
+#contact_pose = 101.0 #106 #Changed this for machined dobject
+contact_pose = 100.5 #101 106 #Changed this for machined dobject
 
 # Ground position in Z
 ground_pose_z = -180.5 #-181.0
@@ -281,7 +281,7 @@ def move(contact_type):
                                     startRecording()
                             
                             #Initial Push
-                            setSpeed(5,5)
+                            setSpeed(5,2)
                             setCart(initial_push_end_pos[0],initial_push_end_pos[1],initial_push_end_pos[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
                             wait_for_goal_position(initial_push_end_pos)
                             
@@ -297,7 +297,7 @@ def move(contact_type):
                             rospy.sleep(1)
                             
                             #Push
-                            setSpeed(push_velocity,5)
+                            setSpeed(push_velocity,1000)
                             push_pos=np.copy(initial_push_end_pos)
                             push_pos[0]= contact_pose - push_distance_x - init_push
                             push_pos[2]+= push_distance_z

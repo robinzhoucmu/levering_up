@@ -57,10 +57,10 @@ std_ori = np.array([0, -0.7071,0.7071,0])
 std_ori_for_tfm = [std_ori[1],std_ori[2],std_ori[3],std_ori[0]]
 
 # List of velocities
-list_of_velocities = [10,15,20,25] 
+list_of_velocities = [3,5,10,20,30,40]#[10,15,20,25] 
 
 # List of Gripping Forces 
-list_of_gripping_forces = [35,32,30,27,25,22,20]
+list_of_gripping_forces =[35,32,30,27,25,22,20]
 
 # List offeset to specify distance from sensor center. Higher value means closer to earth
 list_of_push_offsets = [0,5,10,15,20,25] #[0,10,20,30,40] 
@@ -186,6 +186,8 @@ def check_obj_init_pose():
         return False
         
 def check_obj_after_push_ori():
+        # HACK because I can't test this from distance and it gives false positives / Roman
+        return True
         msg = rospy.wait_for_message("/viconObject", TransformStamped)
         R = tfm.quaternion_matrix([msg.transform.rotation.w,msg.transform.rotation.x,msg.transform.rotation.y,msg.transform.rotation.z])
         euler = tfm.euler_from_matrix(R, 'sxyz')
@@ -244,11 +246,19 @@ def move(contact_type):
                             # Set Speed 
                             setSpeed(20,10)
                             
+                            #Home Gripper 
+                            while True:
+                                try:
+                                    rospy.sleep(10.0)
+                                    homeGripper()
+                                    rospy.sleep(1.0)
+                                    break
+                                except:
+                                    print "Homing gripper failed ... trying again."
+
                             # Set grasping force
                             setGripperForce(gripping_force)
                                                 
-                            #Home Gripper 
-                            homeGripper()
                                                  
                             # Zero Sensors
                             zeroSensorFingerFront()
@@ -275,8 +285,15 @@ def move(contact_type):
                             setCart(grasp_pose[0],grasp_pose[1],grasp_pose[2],grasp_ori[3],grasp_ori[0],grasp_ori[1],grasp_ori[2]) 
                             
                             #Close Gripper 
-                            closeGripper(grasp_width,1)
-                            rospy.sleep(1.0)
+                            while True:
+                                try:
+                                    rospy.sleep(10.0)
+                                    closeGripper(grasp_width,10)
+                                    rospy.sleep(1.0)
+                                    break
+                                except:
+                                    print "Closing gripper failed ... trying again."
+                            
                             
                             #Retract 
                             setCart(approach_pose[0],approach_pose[1],approach_pose[2],grasp_ori[3],grasp_ori[0],grasp_ori[1],grasp_ori[2]) 
@@ -306,6 +323,7 @@ def move(contact_type):
                             #Initial Push
                             setSpeed(10,10)
                             setCart(initial_push_end_pos[0],initial_push_end_pos[1],initial_push_end_pos[2],pivot_quaternions[0][3],pivot_quaternions[0][0],pivot_quaternions[0][1],pivot_quaternions[0][2]) 
+                            rospy.sleep(3)
                             
                             #start recording rosbag
                             if rec_vid:
@@ -316,7 +334,7 @@ def move(contact_type):
                             rospy.sleep(1)
                             
                             #Push
-                            setSpeed(push_velocity,20)
+                            setSpeed(100,push_velocity)
                             push_pos=np.copy(initial_push_end_pos)
                             push_pos[0]= contact_pose - init_push
                             clearBuffer()
@@ -327,6 +345,7 @@ def move(contact_type):
                             # Stop recording rosnode
                             rospy.sleep(1)
                             terminate_ros_node("/record")
+                            rospy.sleep(6)
                             
                             #Retract
                             setSpeed(20,10)
@@ -368,7 +387,14 @@ def move(contact_type):
                             execBuffer()
                             
                             # Open Gripper
-                            openGripper(40,20)
+                            while True:
+                                try:
+                                    rospy.sleep(10.0)
+                                    openGripper(40,20)
+                                    rospy.sleep(1.0)
+                                    break
+                                except:
+                                    print "Opening gripper failed ... trying again."
                             
                             #Retract
                             setSpeed(60,30)

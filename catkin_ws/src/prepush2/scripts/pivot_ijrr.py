@@ -57,19 +57,19 @@ std_ori = np.array([0, -0.7071,0.7071,0])
 std_ori_for_tfm = [std_ori[1],std_ori[2],std_ori[3],std_ori[0]]
 
 # List of velocities
-list_of_velocities = [10] 
+list_of_velocities = [20] 
 
 # List of Gripping Forces 
-list_of_gripping_forces = [35,30,25,20,15,10]
+list_of_gripping_forces = [35]#[35,30,25,20,15,10]
 
 # List offeset to specify distance from sensor center. Higher value means closer to earth
-list_of_push_offsets = [0,5,10,15,20,25,30,40] 
+list_of_push_offsets = [30] #[10,15,20,25,30,35,40,45] 
 
 # Pushing distance projected on ground in mm
 push_distance=15.0
 
 # Number of runs per set of parameters
-num_runs = 5
+num_runs = 10
 
 # Start angle
 start_angle = 55.0
@@ -165,7 +165,9 @@ def make_sure_path_exists(path):
 
 def check_obj_init_pose():
         global object_position_on_ground
+        print 'heref'
         msg = rospy.wait_for_message("/viconObject", TransformStamped)
+        print 'heref2'
         ideal_pos = default_object_position_on_ground/1000.0 #- 0.017#0.019
         upper_threshold = ideal_pos + 0.003
         lower_threshold = ideal_pos - 0.003
@@ -242,11 +244,20 @@ def move(contact_type):
                             setSpeed(20,10)
                             
                             # Set grasping force
+                            rospy.sleep(3.0)
                             setGripperForce(gripping_force)
-                                                
-                            #Home Gripper 
+                            rospy.sleep(1.0)
+                            
+                            print 'here'
+                            
+                            #Home Gripper
+                            rospy.sleep(5.0)
                             homeGripper()
+                            rospy.sleep(1.0)
+                            # homeGripper()
                                                  
+                            print 'here2'
+                            
                             # Zero Sensors
                             zeroSensorFingerFront()
                             zeroSensorFingerBack()
@@ -254,16 +265,18 @@ def move(contact_type):
                             
                             object_position_on_ground = default_object_position_on_ground
                             
+                            print 'here3'
                             # Check inital position. In case object is too close to sensor
                             if position_and_ori_checking:
                                     if check_obj_init_pose():
                                             rospy.loginfo("Initial position seems ok!")
                             
+                            print 'here4'
                             # Move to Approach Pose 
                             setSpeed(60,10)
                             approach_pose=np.array([object_position_on_ground,center_y,-120])
                             setCart(approach_pose[0],approach_pose[1],approach_pose[2],std_ori[0],std_ori[1],std_ori[2],std_ori[3]) 
-                            
+                            print 'here5'
                             #Move to Grasp Pose 
                             setSpeed(15,10)
                             grasp_pose=np.copy(approach_pose)
@@ -271,8 +284,9 @@ def move(contact_type):
                             grasp_ori = tfm.quaternion_multiply(tfm.quaternion_about_axis(((90.0-start_angle)/180.0)*np.pi,(0,-1,0)),std_ori_for_tfm)
                             setCart(grasp_pose[0],grasp_pose[1],grasp_pose[2],grasp_ori[3],grasp_ori[0],grasp_ori[1],grasp_ori[2]) 
                             
-                            #Close Gripper 
-                            closeGripper(grasp_width,1)
+                            #Close Gripper
+                            rospy.sleep(5.0)
+                            closeGripper(grasp_width,10)
                             rospy.sleep(1.0)
                             
                             #Retract 
@@ -312,6 +326,8 @@ def move(contact_type):
                             rosbag_proc = subprocess.Popen('rosbag record -q -O %s %s' % (name_of_bag, " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
                             rospy.sleep(1)
                             
+                            rospy.sleep(5.0)
+                            
                             #Push
                             setSpeed(push_velocity,10)
                             push_pos=np.copy(initial_push_end_pos)
@@ -324,6 +340,8 @@ def move(contact_type):
                             # Stop recording rosnode
                             rospy.sleep(1)
                             terminate_ros_node("/record")
+                            
+                            rospy.sleep(5.0)
                             
                             #Retract
                             setSpeed(15,20)
@@ -365,7 +383,9 @@ def move(contact_type):
                             execBuffer()
                             
                             # Open Gripper
+                            rospy.sleep(5.0)
                             openGripper(40,20)
+                            rospy.sleep(1.0)
                             
                             #Retract
                             setSpeed(20,20)

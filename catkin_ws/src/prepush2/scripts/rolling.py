@@ -49,7 +49,8 @@ init_ori_thresh = 0.07
 
 # Operating Height
 # plate_height = -181.09 + 82.0
-plate_height = -181.09 + 70.0
+# plate_height = -181.09 + 70.0
+plate_height = -181.09 + 47.0
 
 # Operating X position
 rolling_x =260.0 #220.0 
