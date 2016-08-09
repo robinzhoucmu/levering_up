@@ -8,32 +8,32 @@ then
   thisFile=${BASH_SOURCE[0]}
 fi
 
-set_prepush2_base()
+set_levering_up_base()
 {
   # use cd and pwd to get an absolute path
   configParentDir="$(cd "$(dirname "$thisFile")/.." && pwd)"
 
   # different cases for software/config or software/build/config
   case "$(basename $configParentDir)" in
-    "software") export PREPUSH2_BASE=$(dirname $configParentDir);;
-    "build") export PREPUSH2_BASE=$(dirname $(dirname $configParentDir));;
-    *) echo "Warning: PREPUSH2 environment file is stored in unrecognized location: $thisFile";;
+    "software") export LEVERING_UP_BASE=$(dirname $configParentDir);;
+    "build") export LEVERING_UP_BASE=$(dirname $(dirname $configParentDir));;
+    *) echo "Warning: LEVERING_UP environment file is stored in unrecognized location: $thisFile";;
   esac
-  export PREPUSH2DATA_BASE=$PREPUSH2_BASE/../prepush2data
-  export PATH=$PATH:$PREPUSH2_BASE/software/build/bin
+  export LEVERING_UPDATA_BASE=$LEVERING_UP_BASE/../levering_updata
+  export PATH=$PATH:$LEVERING_UP_BASE/software/build/bin
 }
 
-setup_prepush2()
+setup_levering_up()
 {
-  export PATH=$PATH:$PREPUSH2_BASE/software/build/bin
+  export PATH=$PATH:$LEVERING_UP_BASE/software/build/bin
   export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-  export LD_LIBRARY_PATH=$PREPUSH2_BASE/software/build/lib:$PREPUSH2_BASE/software/build/lib64:$LD_LIBRARY_PATH
-  export CLASSPATH=$CLASSPATH:/usr/local/share/java/lcm.jar:$PREPUSH2_BASE/software/build/share/java/lcmtypes_prepush2_lcmtypes.jar
-  export CLASSPATH=$CLASSPATH:$PREPUSH2_BASE/software/build/share/java/drake.jar:$PREPUSH2_BASE/software/build/share/java/bot2-lcmgl.jar
-  export PKG_CONFIG_PATH=$PREPUSH2_BASE/software/build/lib/pkgconfig:$PREPUSH2_BASE/software/build/lib64/pkgconfig:$PKG_CONFIG_PATH
+  export LD_LIBRARY_PATH=$LEVERING_UP_BASE/software/build/lib:$LEVERING_UP_BASE/software/build/lib64:$LD_LIBRARY_PATH
+  export CLASSPATH=$CLASSPATH:/usr/local/share/java/lcm.jar:$LEVERING_UP_BASE/software/build/share/java/lcmtypes_levering_up_lcmtypes.jar
+  export CLASSPATH=$CLASSPATH:$LEVERING_UP_BASE/software/build/share/java/drake.jar:$LEVERING_UP_BASE/software/build/share/java/bot2-lcmgl.jar
+  export PKG_CONFIG_PATH=$LEVERING_UP_BASE/software/build/lib/pkgconfig:$LEVERING_UP_BASE/software/build/lib64/pkgconfig:$PKG_CONFIG_PATH
 
   # python path
-  export PYTHONPATH=$PYTHONPATH:$PREPUSH2_BASE/software/build/lib/python2.7/site-packages:$PREPUSH2_BASE/software/build/lib/python2.7/dist-packages
+  export PYTHONPATH=$PYTHONPATH:$LEVERING_UP_BASE/software/build/lib/python2.7/site-packages:$LEVERING_UP_BASE/software/build/lib/python2.7/dist-packages
   # enable some warnings by default
   export CXXFLAGS="$CXXFLAGS -Wreturn-type -Wuninitialized"
   export CFLAGS="$CFLAGS -Wreturn-type -Wuninitialized"
@@ -48,22 +48,22 @@ setup_prepush2()
 
 set_ros()
 {
-  if [ -f $PREPUSH2_BASE/catkin_ws/devel/setup.bash ]; then
-    source $PREPUSH2_BASE/catkin_ws/devel/setup.bash
+  if [ -f $LEVERING_UP_BASE/catkin_ws/devel/setup.bash ]; then
+    source $LEVERING_UP_BASE/catkin_ws/devel/setup.bash
   else
     source /opt/ros/indigo/setup.bash
   fi
-  export ROS_PACKAGE_PATH=$HOME/prepush2/ros_ws/:$ROS_PACKAGE_PATH
+  export ROS_PACKAGE_PATH=$HOME/levering_up/ros_ws/:$ROS_PACKAGE_PATH
 }
 
 # some useful commands
-alias cdprepush2='cd $PREPUSH2_BASE'
-alias cdprepush2data='cd $PREPUSH2DATA_BASE'
-alias matlabdrake='cd $PREPUSH2_BASE/software; matlab -r "addpath_pods; addpath_drake"'
-alias matlabprepush2='cd $PREPUSH2_BASE/software; matlab -nodesktop -nodisplay -nosplash -r "tic; addpath_pods; addpath_drake; toc; cd ../software/planning/ik_server/; ikTrajServerSocket;"'
+alias cdlevering_up='cd $LEVERING_UP_BASE'
+alias cdlevering_updata='cd $LEVERING_UPDATA_BASE'
+alias matlabdrake='cd $LEVERING_UP_BASE/software; matlab -r "addpath_pods; addpath_drake"'
+alias matlablevering_up='cd $LEVERING_UP_BASE/software; matlab -nodesktop -nodisplay -nosplash -r "tic; addpath_pods; addpath_drake; toc; cd ../software/planning/ik_server/; ikTrajServerSocket;"'
 
 alias gitsub='git submodule update --init --recursive'
-alias gitpull='git -C $PREPUSH2_BASE pull'
+alias gitpull='git -C $LEVERING_UP_BASE pull'
 
 alias rebash='source ~/.bashrc'
 alias open='gnome-open'
@@ -76,9 +76,9 @@ alias slow='rosservice call /robot1_SetSpeed 50 15'
 alias gohome='rosservice call robot2_SetJoints "{j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0}"'
 
 alias teleop='rosrun teleop teleop'
-alias pythonprepush2='ipython -i -c "run $PREPUSH2_BASE/catkin_ws/src/prepush2_config/python/pythonprepush2.py"'
+alias pythonlevering_up='ipython -i -c "run $LEVERING_UP_BASE/catkin_ws/src/levering_up_config/python/pythonlevering_up.py"'
 
-alias pman='bot-procman-sheriff -l $PREPUSH2_BASE/software/config/prepush2.pmd'
+alias pman='bot-procman-sheriff -l $LEVERING_UP_BASE/software/config/levering_up.pmd'
 
 alias roslocal='export ROS_MASTER_URI=http://localhost:11311'
 
@@ -132,8 +132,8 @@ function set_bash {
    export HISTTIMEFORMAT="%d/%m/%y %T "
 }
 
-set_prepush2_base
-setup_prepush2
+set_levering_up_base
+setup_levering_up
 set_ros
 set_bash
 
