@@ -43,7 +43,7 @@ setup_levering_up()
   export ROSLAUNCH_SSH_UNKNOWN=1
   
   #set main git user
-  gituser rkolbert
+  gituser jiaji
 }
 
 set_ros()
