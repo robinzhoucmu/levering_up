@@ -1,6 +1,7 @@
 import rospy
-import roslib; 
+import roslib
 roslib.load_manifest("robot_comm")
+roslib.load_manifest("wsg_")
 from robot_comm.srv import *
 
 class Manipulator(object):
@@ -10,29 +11,29 @@ class Manipulator(object):
         assert 0, "Bad robot type: " + type
     factory = staticmethod(factory)
 
-class Abb120MCube():
+class Abb120MCube(Manipulator):
     def __init__(self):
         init_ros_services()
     def init_ros_services(self):
                 # Initialize related robot services.
-        self.get_cart = rospy.ServiceProxy('/robot_GetCartesian', 
+        self.get_cart = rospy.ServiceProxy('/robot1_GetCartesian', 
                                            robot_comm.srv.robot_GetCartesian)
-        self.set_work_object = rospy.ServiceProxy('/robot_SetWorkObject', 
+        self.set_work_object = rospy.ServiceProxy('/robot1_SetWorkObject', 
                                                   robot_comm.srv.robot_SetWorkObject)
-        self.set_tool = rospy.ServiceProxy('/robot_SetTool', 
+        self.set_tool = rospy.ServiceProxy('/robot1_SetTool', 
                                            robot_comm.srv.robot_SetTool)
-        self.set_cart = rospy.ServiceProxy('/robot_SetCartesian', 
+        self.set_cart = rospy.ServiceProxy('/robot1_SetCartesian', 
                                            robot_comm.srv.robot_SetCartesian)
-        self.set_joints = rospy.ServiceProxy('/robot_SetJoints', 
+        self.set_joints = rospy.ServiceProxy('/robot1_SetJoints', 
                                              robot_comm.srv.robot_SetJoints)
-        self.get_joints = rospy.ServiceProxy('/robot_GetJoints', 
+        self.get_joints = rospy.ServiceProxy('/robot1_GetJoints', 
                                              robot_comm.srv.robot_GetJoints)
-        self.set_speed = rospy.ServiceProxy('/robot_SetSpeed', 
+        self.set_speed = rospy.ServiceProxy('/robot1_SetSpeed', 
                                             robot_comm.srv.robot_SetSpeed)
         self.get_ik = rospy.ServiceProxy('/robot1_GetIK', robot_GetIK)
         
 
-class Abb120MLab():
+class Abb120MLab(Manipulator):
     def __init__(self):
         init_ros_services()
     def init_ros_services(self):
