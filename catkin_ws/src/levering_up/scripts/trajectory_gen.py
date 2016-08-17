@@ -1,11 +1,10 @@
-import numpy as np
 import rospy
 import roslib; 
-roslib.load_manifest("robot_comm")
 roslib.load_manifest("netft_rdt_driver")
-from robot_comm.srv import *
 from wsg_50_common.srv import *
 import tf.transformations as tfm
+
+import numpy as np
 
 import os
 import signal
@@ -22,12 +21,15 @@ import sys, argparse
 class TrajectoryGen:
     def __init__(self):
     def init_ros_services(self):
+    
     def set_geometry(self):
         
     def move_to_init_pose(self):
         ''' Move the robot to a pregrasp pose'''
+
     def grasp_pusher(self):
         ''' Grasp the pusher finger. ''' 
+
     def move_to_pre_levering(self):
         ''' Move the robot (already grasping the finger) to pre-levering pose.
         After the movement, the pusher and the object should be in contact'''
@@ -40,4 +42,4 @@ class TrajectoryGen:
     def execute_trajectory_rolling(self):
         '''  '''
     
-   
+    
