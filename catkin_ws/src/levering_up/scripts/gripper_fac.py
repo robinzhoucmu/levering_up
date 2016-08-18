@@ -14,9 +14,9 @@ class WSG50Gripper(Gripper):
         self.init_ros_services()
     def init_ros_services(self):
         self.home_gripper = rospy.ServiceProxy('/wsg_50_driver/homing', Empty)
-        close_gripper = rospy.ServiceProxy('/wsg_50_driver/grasp', Move)
-        open_gripper = rospy.ServiceProxy('/wsg_50_driver/release', Move)
-        set_gripper_force = rospy.ServiceProxy('/wsg_50_driver/set_force', Conf)
+        self.close_gripper = rospy.ServiceProxy('/wsg_50_driver/grasp', Move)
+        self.open_gripper = rospy.ServiceProxy('/wsg_50_driver/release', Move)
+        self.set_gripper_force = rospy.ServiceProxy('/wsg_50_driver/set_force', Conf)
         
 class Robotiq2FingerGripper(Gripper): 
     def __init__(self):

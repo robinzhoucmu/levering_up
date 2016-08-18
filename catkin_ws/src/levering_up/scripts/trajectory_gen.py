@@ -9,6 +9,7 @@ import numpy as np
 
 import os
 import signal
+import time
 import subprocess 
 import httplib
 from std_srvs.srv  import Empty 
@@ -35,13 +36,17 @@ HEIGHT_PUSHER = 76.00 - 19.8/2 + 1.5
 
 # A bunch of velocity options for tcp.
 # Linear velocities mm/s
-VEL_LINEAR_SLOW = 5
+VEL_LINEAR_SLOW = 10
 VEL_LINEAR_NORMAL = 25
 VEL_LINEAR_FAST = 50
 # Angular velocities degree/s
 VEL_ANGULAR_SLOW = 5
 VEL_ANGULAR_NORMAL = 10
 VEL_ANGULAR_FAST = 20
+
+# Pivoting angle for the rolling process.
+TOT_PIVOT_ANGLE = np.pi/50
+NUM_ROLLING_PTS = 10
 
 # Initial safe pose of the object. (Subject to change).
 # Also this is environment set up dependent. Should be moved
@@ -96,11 +101,11 @@ class TrajectoryGen:
         # perform guarded move to push until object contact the ground-wall corner.
         self.guarded_move_push_object()
     
-    def move_to_platform_above():
+    def move_to_platform_above(self):
         return
-    def guarded_move_down():
+    def guarded_move_down(self):
         return
-    def guarded_move_push_object():
+    def guarded_move_push_object(self):
         # For now, hard code a x direction offset distance.
         delta_x_push = 42.8
         self.robot.set_cart(POS0_SAFE[0] - delta_x_push, POS0_SAFE[1], POS0_SAFE[2], 
@@ -149,3 +154,13 @@ class TrajectoryGen:
 
 if __name__ == '__main__':
     traj_gen = TrajectoryGen()
+    raw_input("Ready for grasping the pusher? Press any key to continue")
+    time.sleep(3.0)
+    traj_gen.grasp_pusher()
+    raw_input("Ready for moving to pre-leverup pose? Press any key to continue")
+    traj_gen.move_to_pre_levering()
+    raw_input("Ready for rolling?")
+    traj_gen.generate_trajectory_rolling(TOT_PIVOT_ANGLE, NUM_ROLLING_PTS)
+    print traj_gen.rolling_cors
+    raw_input("Loose gripper now? Press any key to continue")
+    traj_gen.loose_pusher()
