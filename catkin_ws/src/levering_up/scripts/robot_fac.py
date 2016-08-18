@@ -15,7 +15,7 @@ class Abb120MCube(Manipulator):
     def __init__(self):
         init_ros_services()
     def init_ros_services(self):
-                # Initialize related robot services.
+        # Initialize related robot services.
         self.get_cart = rospy.ServiceProxy('/robot1_GetCartesian', 
                                            robot_comm.srv.robot_GetCartesian)
         self.set_work_object = rospy.ServiceProxy('/robot1_SetWorkObject', 
